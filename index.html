@@ -1,0 +1,1696 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#5d7a8c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="برنامج الخبير">
+<meta name="description" content="نظام إدارة وتتبع القضايا الخبيرية - حسن محمد رشاد">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>برنامج الخبير - حسن محمد رشاد</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; background: #f8f9fa; color: #2c3e50; }
+  .app-wrap { max-width: 1300px; margin: 0 auto; padding: 24px; }
+
+  .header { text-align: center; margin-bottom: 28px; padding: 24px; background: #fff; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border-bottom: 3px solid #5d7a8c; }
+  .header h1 { font-size: 32px; font-weight: 600; color: #34495e; margin-bottom: 6px; letter-spacing: 1px; }
+  .header .subtitle { font-size: 15px; color: #7f8c8d; font-weight: 400; }
+  .header .expert { display: inline-block; margin-top: 10px; font-size: 14px; color: #fff; background: #5d7a8c; padding: 6px 20px; border-radius: 20px; font-weight: 500; }
+
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .stat-card { background: #fff; border-radius: 12px; padding: 18px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border-top: 3px solid #bdc3c7; transition: transform 0.2s; cursor: pointer; }
+  .stat-card:hover { transform: translateY(-3px); }
+  .stat-value { font-size: 26px; font-weight: 600; color: #2c3e50; font-variant-numeric: tabular-nums; }
+  .stat-label { font-size: 12px; color: #7f8c8d; margin-top: 6px; font-weight: 500; }
+  .stat-card.active { border-top-color: #27ae60; }
+  .stat-card.active .stat-value { color: #27ae60; }
+  .stat-card.pending { border-top-color: #f39c12; }
+  .stat-card.pending .stat-value { color: #f39c12; }
+  .stat-card.returned { border-top-color: #e74c3c; }
+  .stat-card.returned .stat-value { color: #e74c3c; }
+  .stat-card.info { border-top-color: #2980b9; }
+  .stat-card.info .stat-value { color: #2980b9; }
+
+  .search-panel { background: #fff; border-radius: 14px; padding: 22px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .search-title { font-size: 16px; font-weight: 600; color: #34495e; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .search-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .search-field { display: flex; flex-direction: column; gap: 5px; }
+  .search-field label { font-size: 12px; color: #7f8c8d; font-weight: 500; }
+  .search-field input, .search-field select { padding: 10px 12px; border: 1px solid #e1e8ed; border-radius: 10px; font-size: 14px; background: #fafbfc; color: #2c3e50; font-family: inherit; transition: border-color 0.2s; }
+  .search-field input:focus, .search-field select:focus { outline: none; border-color: #5d7a8c; background: #fff; }
+  .search-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+  .btn { padding: 10px 20px; border-radius: 10px; border: none; font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-primary { background: #5d7a8c; color: #fff; }
+  .btn-primary:hover { background: #4a6573; }
+  .btn-secondary { background: #ecf0f1; color: #7f8c8d; }
+  .btn-secondary:hover { background: #dfe6e9; color: #5d7a8c; }
+  .btn-success { background: #27ae60; color: #fff; }
+  .btn-success:hover { background: #219a52; }
+  .btn-danger { background: #fdedec; color: #c0392b; padding: 6px 12px; font-size: 12px; }
+  .btn-danger:hover { background: #fadbd8; }
+  .btn-info { background: #eaf2f8; color: #2980b9; }
+  .btn-info:hover { background: #d4e6f1; }
+  .btn-warning { background: #fef5e7; color: #d68910; }
+  .btn-warning:hover { background: #fdebd0; }
+
+  .table-wrap { background: #fff; border-radius: 14px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .table-header { padding: 16px 22px; border-bottom: 1px solid #f0f2f5; display: flex; justify-content: space-between; align-items: center; background: #fff; }
+  .table-header h3 { font-size: 16px; font-weight: 600; color: #34495e; }
+  .header-actions { display: flex; align-items: center; gap: 14px; }
+  .result-count { font-size: 13px; color: #5d7a8c; background: #f0f4f7; padding: 5px 14px; border-radius: 20px; font-weight: 500; }
+  .table-scroll { overflow-x: auto; max-height: 560px; overflow-y: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #f8f9fa; padding: 12px 14px; text-align: right; font-weight: 600; color: #5d7a8c; font-size: 12px; position: sticky; top: 0; z-index: 2; white-space: nowrap; border-bottom: 2px solid #e1e8ed; }
+  td { padding: 12px 14px; border-bottom: 1px solid #f0f2f5; color: #2c3e50; vertical-align: middle; }
+  tr:hover td { background: #fafbfc; }
+  tr:last-child td { border-bottom: none; }
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+  .badge-type { background: #eaf2f8; color: #2980b9; }
+  .badge-status-jari { background: #e8f8f0; color: #27ae60; }
+  .badge-status-lam { background: #fef5e7; color: #d68910; }
+  .badge-returned-yes { background: #fdedec; color: #c0392b; }
+  .badge-returned-no { background: #f4f6f7; color: #7f8c8d; }
+  .notes-cell { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: help; }
+  .notes-cell:hover { white-space: normal; overflow: visible; }
+  .empty-state { text-align: center; padding: 50px; color: #95a5a6; font-size: 15px; }
+
+  .table-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-scroll::-webkit-scrollbar-track { background: transparent; }
+  .table-scroll::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 3px; }
+
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(3px); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.25s ease; }
+  .modal-overlay.show { opacity: 1; }
+  .modal { background: #fff; border-radius: 16px; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.15); transform: translateY(20px) scale(0.97); transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  .modal-overlay.show .modal { transform: translateY(0) scale(1); }
+  .modal-header { padding: 20px 24px; border-bottom: 1px solid #f0f2f5; display: flex; justify-content: space-between; align-items: center; }
+  .modal-header h3 { font-size: 18px; font-weight: 600; color: #34495e; }
+  .modal-close { background: none; border: none; cursor: pointer; color: #95a5a6; padding: 4px; border-radius: 8px; transition: all 0.2s; }
+  .modal-close:hover { background: #f0f2f5; color: #e74c3c; }
+  .modal-body { padding: 24px; }
+  .modal-footer { padding: 16px 24px; border-top: 1px solid #f0f2f5; display: flex; justify-content: flex-end; gap: 10px; }
+
+  .form-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .form-field { display: flex; flex-direction: column; gap: 5px; }
+  .form-field.full-width { grid-column: 1 / -1; }
+  .form-field label { font-size: 13px; color: #34495e; font-weight: 500; }
+  .form-field .required { color: #e74c3c; }
+  .form-field input, .form-field select, .form-field textarea { padding: 10px 14px; border: 1px solid #e1e8ed; border-radius: 10px; font-size: 14px; background: #fafbfc; color: #2c3e50; font-family: inherit; transition: all 0.2s; }
+  .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: #5d7a8c; background: #fff; box-shadow: 0 0 0 3px rgba(93,122,140,0.08); }
+  .form-field input.error, .form-field select.error { border-color: #e74c3c; background: #fff5f5; }
+  .error-msg { font-size: 11px; color: #e74c3c; min-height: 16px; }
+
+  .stats-tabs { display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 4px; }
+  .stats-tab { padding: 10px 18px; border-radius: 10px 10px 0 0; border: none; background: none; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 500; color: #7f8c8d; transition: all 0.2s; position: relative; }
+  .stats-tab:hover { color: #5d7a8c; background: #f8f9fa; }
+  .stats-tab.active { color: #5d7a8c; background: #eaf2f8; }
+  .stats-tab.active::after { content: ''; position: absolute; bottom: -6px; left: 0; right: 0; height: 3px; background: #5d7a8c; border-radius: 2px; }
+
+  .stats-content { display: none; }
+  .stats-content.active { display: block; }
+
+  .chart-container { display: flex; align-items: flex-end; gap: 12px; height: 220px; padding: 20px 10px 10px; background: #fafbfc; border-radius: 12px; margin-bottom: 20px; }
+  .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .chart-bar { width: 100%; max-width: 60px; background: linear-gradient(to top, #5d7a8c, #7fa3b8); border-radius: 8px 8px 0 0; transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1); position: relative; }
+  .chart-bar:hover { filter: brightness(1.1); }
+  .chart-bar-value { position: absolute; top: -22px; left: 50%; transform: translateX(-50%); font-size: 13px; font-weight: 600; color: #2c3e50; }
+  .chart-label { font-size: 12px; color: #5d7a8c; font-weight: 500; text-align: center; white-space: nowrap; }
+
+  .stats-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+  .summary-card { background: #fff; border: 1px solid #e1e8ed; border-radius: 10px; padding: 14px; text-align: center; }
+  .summary-value { font-size: 22px; font-weight: 600; color: #2c3e50; }
+  .summary-label { font-size: 12px; color: #7f8c8d; margin-top: 4px; }
+
+  .period-filter { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; margin-bottom: 20px; align-items: end; }
+  .period-filter .form-field { margin: 0; }
+
+  .detail-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .detail-table th { background: #f8f9fa; padding: 10px 12px; text-align: right; font-weight: 600; color: #5d7a8c; font-size: 11px; border-bottom: 2px solid #e1e8ed; }
+  .detail-table td { padding: 10px 12px; border-bottom: 1px solid #f0f2f5; }
+  .detail-table tr:hover td { background: #fafbfc; }
+
+  .toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: #27ae60; color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 30px rgba(39,174,96,0.3); z-index: 200; opacity: 0; transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.error { background: #e74c3c; box-shadow: 0 8px 30px rgba(231,76,60,0.3); }
+
+  @media (max-width: 768px) {
+    .search-grid { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    th, td { padding: 10px; font-size: 12px; }
+    .header h1 { font-size: 24px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .header-actions { flex-direction: column; gap: 8px; align-items: stretch; }
+    .period-filter { grid-template-columns: 1fr; }
+    .chart-container { height: 160px; }
+    .stats-tabs { overflow-x: auto; }
+  }
+</style>
+<base target="_blank">
+</head>
+<body>
+<div class="app-wrap">
+  <div class="header">
+    <h1>برنامج الخبير</h1>
+    <div class="subtitle">نظام إدارة وتتبع القضايا الخبيرية</div>
+    <div class="expert">الخبير / حسن محمد رشاد</div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="search-panel">
+    <div class="search-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:#5d7a8c"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+      البحث المتقدم في القضايا
+    </div>
+    <div class="search-grid">
+      <div class="search-field">
+        <label>نوع القضية</label>
+        <select id="f-type"><option value="">الكل</option></select>
+      </div>
+      <div class="search-field">
+        <label>رقم الدعوى</label>
+        <input type="text" id="f-case" placeholder="أدخل رقم الدعوى">
+      </div>
+      <div class="search-field">
+        <label>سنة القيد</label>
+        <input type="text" id="f-year" placeholder="أدخل سنة القيد">
+      </div>
+      <div class="search-field">
+        <label>اسم المحكمة</label>
+        <input type="text" id="f-court" placeholder="أدخل اسم المحكمة">
+      </div>
+      <div class="search-field">
+        <label>رقم الوارد</label>
+        <input type="text" id="f-incoming" placeholder="أدخل رقم الوارد">
+      </div>
+      <div class="search-field">
+        <label>تاريخ الوارد</label>
+        <input type="text" id="f-incoming-date" placeholder="YYYY-MM-DD">
+      </div>
+      <div class="search-field">
+        <label>تاريخ الاستلام</label>
+        <input type="text" id="f-receive-date" placeholder="YYYY-MM-DD">
+      </div>
+      <div class="search-field">
+        <label>مرتدة</label>
+        <select id="f-returned"><option value="">الكل</option><option value="نعم">نعم</option><option value="لا">لا</option></select>
+      </div>
+      <div class="search-field">
+        <label>الموقف من الفحص</label>
+        <select id="f-status"><option value="">الكل</option><option value="جاري">جاري</option><option value="لم يبدأ">لم يبدأ</option><option value="منجزة">منجزة</option><option value="مسحوبة">مسحوبة</option></select>
+      </div>
+      <div class="search-field">
+        <label>ملاحظات وخبراء</label>
+        <input type="text" id="f-notes" placeholder="بحث في الملاحظات">
+      </div>
+    </div>
+    <div class="search-actions">
+      <button class="btn btn-secondary" onclick="clearFilters()">مسح البحث</button>
+      <button class="btn btn-primary" onclick="applyFilters()">بحث</button>
+    </div>
+    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f0f2f5; display: flex; gap: 10px; justify-content: flex-end;">
+      <button class="btn btn-info" onclick="exportData()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        تصدير البيانات
+      </button>
+      <button class="btn btn-warning" onclick="document.getElementById('import-file').click()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+        استيراد البيانات
+      </button>
+      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this)">
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <div class="table-header">
+      <h3>قائمة القضايا</h3>
+      <div class="header-actions">
+        <span class="result-count" id="result-count">جاري التحميل...</span>
+        <button class="btn btn-info" onclick="openStatsModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+          التقارير والإحصائيات
+        </button>
+        <button class="btn btn-success" onclick="openAddModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          إضافة قضية جديدة
+        </button>
+        <button class="btn btn-primary" onclick="printTable()" title="طباعة البيانات المعروضة">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          طباعة
+        </button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table id="cases-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>النوع</th>
+            <th>رقم الدعوى</th>
+            <th>سنة القيد</th>
+            <th>المحكمة</th>
+            <th>رقم الوارد</th>
+            <th>تاريخ الوارد</th>
+            <th>تاريخ الاستلام</th>
+            <th>مرتدة</th>
+            <th>الموقف</th>
+            <th>الإنجاز</th>
+            <th>شهر الإنجاز</th>
+            <th>ملاحظات</th>
+            <th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none">لا توجد نتائج مطابقة للبحث</div>
+    </div>
+  </div>
+
+  <!-- Add Case Modal -->
+  <div class="modal-overlay" id="add-modal" style="display:none">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>إضافة قضية جديدة</h3>
+        <button class="modal-close" onclick="closeAddModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-field">
+            <label>نوع القضية <span class="required">*</span></label>
+            <select id="new-type">
+              <option value="">اختر النوع</option>
+              <option value="استئناف عالي">استئناف عالي</option>
+              <option value="مدني">مدني</option>
+              <option value="جنح">جنح</option>
+              <option value="قضاء إداري">قضاء إداري</option>
+              <option value="أحوال">أحوال</option>
+            </select>
+            <span class="error-msg" id="err-type"></span>
+          </div>
+          <div class="form-field">
+            <label>رقم الدعوى <span class="required">*</span></label>
+            <input type="text" id="new-case" placeholder="أدخل رقم الدعوى">
+            <span class="error-msg" id="err-case"></span>
+          </div>
+          <div class="form-field">
+            <label>سنة القيد <span class="required">*</span></label>
+            <input type="text" id="new-year" placeholder="مثال: 2025 أو 60ق">
+            <span class="error-msg" id="err-year"></span>
+          </div>
+          <div class="form-field">
+            <label>اسم المحكمة <span class="required">*</span></label>
+            <input type="text" id="new-court" placeholder="أدخل اسم المحكمة">
+            <span class="error-msg" id="err-court"></span>
+          </div>
+          <div class="form-field">
+            <label>رقم الوارد <span class="required">*</span></label>
+            <input type="text" id="new-incoming" placeholder="أدخل رقم الوارد">
+            <span class="error-msg" id="err-incoming"></span>
+          </div>
+          <div class="form-field">
+            <label>تاريخ الوارد <span class="required">*</span></label>
+            <input type="date" id="new-incoming-date">
+            <span class="error-msg" id="err-incoming-date"></span>
+          </div>
+          <div class="form-field">
+            <label>تاريخ الاستلام <span class="required">*</span></label>
+            <input type="date" id="new-receive-date">
+            <span class="error-msg" id="err-receive-date"></span>
+          </div>
+          <div class="form-field">
+            <label>مرتدة <span class="required">*</span></label>
+            <select id="new-returned">
+              <option value="لا">لا</option>
+              <option value="نعم">نعم</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>الموقف من الفحص <span class="required">*</span></label>
+            <select id="new-status">
+              <option value="لم يبدأ">لم يبدأ</option>
+              <option value="جاري">جاري</option>
+              <option value="منجزة">منجزة</option>
+              <option value="مسحوبة">مسحوبة</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>نوع الإنجاز</label>
+            <select id="new-achievement-type">
+              <option value="">لم يتم</option>
+              <option value="تقرير">تقرير</option>
+              <option value="مذكرة">مذكرة</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>شهر الإنجاز</label>
+            <input type="month" id="new-achievement-month" placeholder="YYYY-MM">
+          </div>
+          <div class="form-field full-width">
+            <label>ملاحظات</label>
+            <textarea id="new-notes" rows="3" placeholder="أدخل أي ملاحظات إضافية..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAddModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="submitCase()">حفظ القضية</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievement Modal -->
+  <div class="modal-overlay" id="achievement-modal" style="display:none">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>تسجيل إنجاز القضية</h3>
+        <button class="modal-close" onclick="closeAchievementModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid" style="grid-template-columns: 1fr;">
+          <div class="form-field">
+            <label>نوع الإنجاز <span class="required">*</span></label>
+            <select id="ach-modal-type">
+              <option value="تقرير">تقرير</option>
+              <option value="مذكرة">مذكرة</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>شهر الإنجاز <span class="required">*</span></label>
+            <input type="month" id="ach-modal-month">
+            <span class="error-msg" id="err-ach-month"></span>
+          </div>
+          <div class="form-field">
+            <label>ملاحظات</label>
+            <textarea id="ach-modal-notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAchievementModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="submitAchievement()">حفظ الإنجاز</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Withdraw Modal -->
+  <div class="modal-overlay" id="withdraw-modal" style="display:none">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3>تسجيل سحب القضية</h3>
+        <button class="modal-close" onclick="closeWithdrawModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid" style="grid-template-columns: 1fr;">
+          <div class="form-field">
+            <label>تاريخ السحب <span class="required">*</span></label>
+            <input type="date" id="withdraw-modal-date">
+            <span class="error-msg" id="err-withdraw-date"></span>
+          </div>
+          <div class="form-field">
+            <label>اسم الخبير الجديد <span class="required">*</span></label>
+            <input type="text" id="withdraw-modal-expert" placeholder="أدخل اسم الخبير الجديد">
+            <span class="error-msg" id="err-withdraw-expert"></span>
+          </div>
+          <div class="form-field">
+            <label>ملاحظات</label>
+            <textarea id="withdraw-modal-notes" rows="2" placeholder="أي ملاحظات إضافية..."></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeWithdrawModal()">إلغاء</button>
+        <button class="btn btn-primary" onclick="submitWithdraw()">حفظ السحب</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Modal -->
+  <div class="modal-overlay" id="stats-modal" style="display:none">
+    <div class="modal" style="max-width: 900px;">
+      <div class="modal-header">
+        <h3>التقارير والإحصائيات</h3>
+        <button class="modal-close" onclick="closeStatsModal()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="stats-tabs">
+          <button class="stats-tab active" onclick="switchStatsTab('type-summary')" data-tab="type-summary">بيان عددي بنوع القضايا</button>
+          <button class="stats-tab" onclick="switchStatsTab('type-detail')" data-tab="type-detail">بيان تفصيلي بنوع القضايا</button>
+          <button class="stats-tab" onclick="switchStatsTab('period-summary')" data-tab="period-summary">بيان عددي بالفترة</button>
+          <button class="stats-tab" onclick="switchStatsTab('period-detail')" data-tab="period-detail">بيان تفصيلي بالفترة</button>
+          <button class="stats-tab" onclick="switchStatsTab('achievement')" data-tab="achievement">كشف إنجاز</button>
+        </div>
+
+        <div class="stats-content active" id="tab-type-summary">
+          <div class="stats-summary" id="type-summary-cards"></div>
+          <div class="chart-container" id="type-chart"></div>
+        </div>
+
+        <div class="stats-content" id="tab-type-detail">
+          <div class="table-scroll" style="max-height: 400px;">
+            <table class="detail-table" id="type-detail-table">
+              <thead><tr><th>النوع</th><th>العدد</th><th>جاري</th><th>لم يبدأ</th><th>مرتدة</th><th>النسبة</th></tr></thead>
+              <tbody id="type-detail-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="stats-content" id="tab-period-summary">
+          <div class="period-filter">
+            <div class="form-field">
+              <label>من تاريخ</label>
+              <input type="date" id="period-from">
+            </div>
+            <div class="form-field">
+              <label>إلى تاريخ</label>
+              <input type="date" id="period-to">
+            </div>
+            <button class="btn btn-primary" onclick="applyPeriodFilter()">عرض</button>
+          </div>
+          <div class="stats-summary" id="period-summary-cards"></div>
+          <div class="chart-container" id="period-chart"></div>
+        </div>
+
+        <div class="stats-content" id="tab-period-detail">
+          <div class="period-filter">
+            <div class="form-field">
+              <label>من تاريخ</label>
+              <input type="date" id="period-detail-from">
+            </div>
+            <div class="form-field">
+              <label>إلى تاريخ</label>
+              <input type="date" id="period-detail-to">
+            </div>
+            <button class="btn btn-primary" onclick="applyPeriodDetailFilter()">عرض</button>
+          </div>
+          <div class="table-scroll" style="max-height: 400px;">
+            <table class="detail-table" id="period-detail-table">
+              <thead>
+                <tr>
+                  <th>#</th><th>النوع</th><th>رقم الدعوى</th><th>سنة القيد</th><th>المحكمة</th>
+                  <th>رقم الوارد</th><th>تاريخ الوارد</th><th>الموقف</th><th>مرتدة</th>
+                </tr>
+              </thead>
+              <tbody id="period-detail-tbody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="period-detail-empty" style="display:none; padding: 30px;">لا توجد قضايا في هذه الفترة</div>
+        </div>
+
+        <div class="stats-content" id="tab-achievement">
+          <div class="period-filter">
+            <div class="form-field">
+              <label>شهر الإنجاز</label>
+              <input type="month" id="achievement-from">
+            </div>
+            <div class="form-field">
+              <label>نوع القضية</label>
+              <select id="achievement-type"><option value="">الكل</option></select>
+            </div>
+            <button class="btn btn-primary" onclick="applyAchievementFilter()">عرض كشف الإنجاز</button>
+          </div>
+          <div id="achievement-preview" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="printStats()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          طباعة التقرير
+        </button>
+        <button class="btn btn-secondary" onclick="closeStatsModal()">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+    <span id="toast-msg">تمت الإضافة بنجاح</span>
+  </div>
+</div>
+<script>
+const defaultCases = [
+  {"id":1,"type":"استئناف عالي","case_no":"3380","year":"60ق","court":"م المنيا","incoming_no":"3615","incoming_date":"2025-06-01","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":2,"type":"استئناف عالي","case_no":"3794","year":"60ق","court":"م المنيا","incoming_no":"3691","incoming_date":"2025-06-02","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":3,"type":"استئناف عالي","case_no":"4266","year":"60ق","court":"م المنيا","incoming_no":"4451","incoming_date":"2025-07-01","receive_date":"2025-07-14","returned":"لا","status":"جاري","notes":""},
+  {"id":4,"type":"استئناف عالي","case_no":"4736","year":"60ق","court":"م المنيا","incoming_no":"5720","incoming_date":"2025-08-13","receive_date":"2025-08-18","returned":"لا","status":"جاري","notes":""},
+  {"id":5,"type":"استئناف عالي","case_no":"3214","year":"58ق","court":"م المنيا","incoming_no":"1963","incoming_date":"2026-03-08","receive_date":"2026-03-24","returned":"نعم","status":"جاري","notes":"مشتركة خبير هندسي/حسن محمد رشاد وخبير زراعي/محمد محمود حسن سطوحي"},
+  {"id":6,"type":"استئناف عالي","case_no":"3056/2901","year":"61ق","court":"م المنيا","incoming_no":"3172","incoming_date":"2026-05-09","receive_date":"2026-06-01","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":7,"type":"مدني","case_no":"1064","year":"2025","court":"م ك المنيا","incoming_no":"3447","incoming_date":"2025-05-20","receive_date":"2025-05-26","returned":"لا","status":"جاري","notes":""},
+  {"id":8,"type":"مدني","case_no":"398","year":"2025","court":"م ك أبو قرقاص","incoming_no":"3602","incoming_date":"2025-06-01","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":9,"type":"مدني","case_no":"145","year":"2025","court":"م ك أبو قرقاص","incoming_no":"3615","incoming_date":"2025-06-01","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":10,"type":"مدني","case_no":"44","year":"2025","court":"م ك أبو قرقاص","incoming_no":"3635","incoming_date":"2025-06-01","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":11,"type":"مدني","case_no":"8","year":"2025","court":"م ك أوقاف المنيا","incoming_no":"3987","incoming_date":"2025-06-10","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":12,"type":"مدني","case_no":"1632","year":"2025","court":"م ك المنيا","incoming_no":"4266","incoming_date":"2025-06-21","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":13,"type":"مدني","case_no":"421","year":"2025","court":"م ك المنيا","incoming_no":"4270","incoming_date":"2025-06-21","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":""},
+  {"id":14,"type":"مدني","case_no":"886","year":"2024","court":"م ج سمالوط","incoming_no":"4489","incoming_date":"2025-07-01","receive_date":"2025-07-14","returned":"لا","status":"جاري","notes":""},
+  {"id":15,"type":"مدني","case_no":"1997","year":"2025","court":"م ك المنيا","incoming_no":"5067","incoming_date":"2025-07-19","receive_date":"2025-07-29","returned":"لا","status":"جاري","notes":""},
+  {"id":16,"type":"مدني","case_no":"1510","year":"2025","court":"م ك المنيا","incoming_no":"5177","incoming_date":"2025-07-21","receive_date":"2025-08-03","returned":"لا","status":"جاري","notes":""},
+  {"id":17,"type":"مدني","case_no":"472","year":"2025","court":"م ك أبو قرقاص","incoming_no":"5233","incoming_date":"2025-07-26","receive_date":"2025-08-03","returned":"لا","status":"جاري","notes":""},
+  {"id":18,"type":"مدني","case_no":"2478","year":"2025","court":"م ك المنيا","incoming_no":"6584","incoming_date":"2025-10-01","receive_date":"2025-11-09","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":19,"type":"مدني","case_no":"280","year":"2025","court":"م بندر المنيا","incoming_no":"8825","incoming_date":"2025-11-19","receive_date":"2025-11-25","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":20,"type":"مدني","case_no":"1784","year":"2025","court":"م ك المنيا","incoming_no":"9180","incoming_date":"2025-12-09","receive_date":"2025-12-29","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":21,"type":"مدني","case_no":"762","year":"2025","court":"م سمالوط","incoming_no":"9638","incoming_date":"2025-12-02","receive_date":"2025-12-29","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":22,"type":"مدني","case_no":"2713","year":"2025","court":"م ك المنيا","incoming_no":"295","incoming_date":"2026-01-18","receive_date":"2026-01-31","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":23,"type":"مدني","case_no":"398","year":"2025","court":"م بندر المنيا","incoming_no":"363","incoming_date":"2026-01-20","receive_date":"2026-01-31","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":24,"type":"مدني","case_no":"2579","year":"2024","court":"م ك المنيا","incoming_no":"1068","incoming_date":"2026-02-04","receive_date":"2026-02-14","returned":"نعم","status":"جاري","notes":""},
+  {"id":25,"type":"مدني","case_no":"79","year":"2025","court":"م ك المنيا","incoming_no":"1426","incoming_date":"2026-02-16","receive_date":"2026-03-01","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":26,"type":"مدني","case_no":"2613","year":"2025","court":"م ك المنيا","incoming_no":"3038","incoming_date":"2026-05-04","receive_date":"2026-06-01","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":27,"type":"مدنية","case_no":"3943","year":"2024","court":"م ك المنيا","incoming_no":"1948","incoming_date":"2025-03-15","receive_date":"2025-04-09","returned":"لا","status":"جاري","notes":""},
+  {"id":28,"type":"مدنية","case_no":"365","year":"2025","court":"م ك المنيا","incoming_no":"2785","incoming_date":"2025-05-03","receive_date":"2025-06-02","returned":"لا","status":"جاري","notes":""},
+  {"id":29,"type":"مدنية","case_no":"1142","year":"2025","court":"م ك المنيا","incoming_no":"3344","incoming_date":"2025-05-17","receive_date":"2025-05-26","returned":"لا","status":"جاري","notes":""},
+  {"id":30,"type":"مدنية","case_no":"884","year":"2025","court":"م ك المنيا","incoming_no":"3380","incoming_date":"2025-05-18","receive_date":"2025-05-26","returned":"لا","status":"جاري","notes":""},
+  {"id":31,"type":"جنح","case_no":"14648","year":"2024","court":"جنح شرق سمالوط","incoming_no":"8567","incoming_date":"2025-11-11","receive_date":"2025-11-16","returned":"لا","status":"جاري","notes":""},
+  {"id":32,"type":"جنح","case_no":"15019","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"8801","incoming_date":"2025-11-19","receive_date":"2025-11-23","returned":"لا","status":"جاري","notes":""},
+  {"id":33,"type":"جنح","case_no":"34051","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"441","incoming_date":"2026-01-21","receive_date":"2026-01-31","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":34,"type":"جنح","case_no":"33306","year":"2024","court":"جنح س أبو قرقاص","incoming_no":"458","incoming_date":"2026-01-21","receive_date":"2026-01-31","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":35,"type":"جنح","case_no":"35701","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"495","incoming_date":"2026-01-22","receive_date":"2026-01-31","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":36,"type":"جنح","case_no":"36025","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"504","incoming_date":"2026-01-22","receive_date":"2026-01-31","returned":"لا","status":"جاري","notes":""},
+  {"id":37,"type":"جنح","case_no":"37019","year":"2025","court":"جنح س سمالوط","incoming_no":"673","incoming_date":"2026-01-24","receive_date":"2026-02-02","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":38,"type":"جنح","case_no":"34942","year":"2024","court":"جنح س سمالوط","incoming_no":"690","incoming_date":"2026-01-24","receive_date":"2026-02-02","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":39,"type":"جنح","case_no":"35883","year":"2025","court":"جنح س سمالوط","incoming_no":"692","incoming_date":"2026-01-24","receive_date":"2026-02-02","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":40,"type":"جنح","case_no":"9248","year":"2025","court":"جنح س سمالوط","incoming_no":"743","incoming_date":"2026-01-25","receive_date":"2026-02-02","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":41,"type":"جنح","case_no":"24102","year":"2025","court":"جنح س سمالوط","incoming_no":"845","incoming_date":"2026-01-26","receive_date":"2026-02-02","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":42,"type":"جنح","case_no":"22017","year":"2025","court":"جنح س سمالوط","incoming_no":"848","incoming_date":"2026-01-26","receive_date":"2026-02-02","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":43,"type":"جنح","case_no":"38192","year":"2025","court":"جنح س سمالوط","incoming_no":"914","incoming_date":"2026-01-26","receive_date":"2026-02-02","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":44,"type":"جنح","case_no":"37829","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"1305","incoming_date":"2026-02-10","receive_date":"2026-03-01","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":45,"type":"جنح","case_no":"37285","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"1315","incoming_date":"2026-02-10","receive_date":"2026-03-01","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":46,"type":"جنح","case_no":"37763","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"1316","incoming_date":"2026-02-10","receive_date":"2026-03-01","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":47,"type":"جنح","case_no":"37722","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"1317","incoming_date":"2026-02-10","receive_date":"2026-03-01","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":48,"type":"جنح","case_no":"4250","year":"2026","court":"جنح س أبو قرقاص","incoming_no":"3659","incoming_date":"2026-06-03","receive_date":"2026-06-15","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":49,"type":"جنح","case_no":"9231","year":"2026","court":"جنح س أبو قرقاص","incoming_no":"3683","incoming_date":"2026-06-03","receive_date":"2026-06-15","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":50,"type":"جنح","case_no":"23578","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"3693","incoming_date":"2026-06-03","receive_date":"2026-06-15","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":51,"type":"قضاء إداري","case_no":"3216","year":"15ق","court":"إداري المنيا","incoming_no":"4216","incoming_date":"2025-06-15","receive_date":"2025-06-25","returned":"لا","status":"جاري","notes":"قضاء إداري"},
+  {"id":52,"type":"قضاء إداري","case_no":"5472","year":"15ق","court":"إداري المنيا","incoming_no":"5011","incoming_date":"2025-07-14","receive_date":"2025-07-29","returned":"لا","status":"لم يبدأ","notes":"قضاء إداري"},
+  {"id":53,"type":"قضاء إداري","case_no":"18441","year":"15ق","court":"إداري المنيا","incoming_no":"212","incoming_date":"2026-01-14","receive_date":"2026-01-31","returned":"لا","status":"لم يبدأ","notes":"قضاء إداري"},
+  {"id":54,"type":"قضاء إداري","case_no":"16036","year":"15ق","court":"إداري المنيا","incoming_no":"273","incoming_date":"2026-01-15","receive_date":"2026-01-31","returned":"لا","status":"لم يبدأ","notes":"قضاء إداري"},
+  {"id":55,"type":"قضاء إداري","case_no":"15858","year":"15ق","court":"إداري المنيا","incoming_no":"1151","incoming_date":"2026-02-07","receive_date":"2026-02-14","returned":"لا","status":"لم يبدأ","notes":"قضاء إداري"},
+  {"id":56,"type":"قضاء إداري","case_no":"916","year":"16ق","court":"إداري المنيا","incoming_no":"626","incoming_date":"2026-02-24","receive_date":"2026-03-04","returned":"لا","status":"لم يبدأ","notes":"قضاء إداري"},
+  {"id":57,"type":"قضاء إداري","case_no":"1472","year":"16ق","court":"إداري المنيا","incoming_no":"1567","incoming_date":"2026-02-23","receive_date":"2026-03-04","returned":"لا","status":"لم يبدأ","notes":"قضاء إداري"},
+  {"id":58,"type":"جنح","case_no":"4251","year":"2026","court":"جنح س أبو قرقاص","incoming_no":"3714","incoming_date":"2026-06-03","receive_date":"2026-06-15","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":59,"type":"جنح","case_no":"6133","year":"2026","court":"جنح س أبو قرقاص","incoming_no":"3743","incoming_date":"2026-06-03","receive_date":"2026-06-15","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":60,"type":"جنح","case_no":"3131","year":"2026","court":"جنح مطاي","incoming_no":"3874","incoming_date":"2026-06-06","receive_date":"2026-06-21","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":61,"type":"مدني","case_no":"464","year":"2025","court":"م ج مطاي","incoming_no":"3174","incoming_date":"2026-05-09","receive_date":"2026-06-21","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":62,"type":"مدني","case_no":"461","year":"2025","court":"م ك المنيا","incoming_no":"3986","incoming_date":"2026-06-15","receive_date":"2026-06-30","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":63,"type":"مدني","case_no":"146","year":"2026","court":"م ك المنيا","incoming_no":"4183","incoming_date":"2026-06-24","receive_date":"2026-07-05","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":64,"type":"أحوال","case_no":"283","year":"2025","court":"نيابة بندر المنيا ش أ","incoming_no":"8520","incoming_date":"2025-11-10","receive_date":"2025-11-13","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":65,"type":"أحوال","case_no":"472","year":"2025","court":"نيابة مركز المنيا ش أ","incoming_no":"8919","incoming_date":"2025-11-23","receive_date":"2025-11-27","returned":"لا","status":"جاري","notes":""},
+  {"id":66,"type":"أحوال","case_no":"441","year":"2025","court":"نيابة مركز المنيا ش أ","incoming_no":"9134","incoming_date":"2025-12-02","receive_date":"2025-12-29","returned":"لا","status":"جاري","notes":""},
+  {"id":67,"type":"أحوال","case_no":"137","year":"2021","court":"نيابة قسم المنيا ش أ","incoming_no":"50","incoming_date":"2026-01-04","receive_date":"2026-01-19","returned":"نعم","status":"جاري","notes":""},
+  {"id":68,"type":"أحوال","case_no":"224","year":"2025","court":"نيابة أبو قرقاص ش أ","incoming_no":"1603","incoming_date":"2026-02-24","receive_date":"2026-03-04","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":69,"type":"أحوال","case_no":"78","year":"2026","court":"نيابة بندر المنيا ش أ","incoming_no":"959","incoming_date":"2026-04-27","receive_date":"2026-05-11","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":70,"type":"أحوال","case_no":"250","year":"2023","court":"نيابة بندر المنيا ش أ","incoming_no":"3758","incoming_date":"2026-06-04","receive_date":"2026-06-21","returned":"نعما","status":"لم يبدأ","notes":""},
+  {"id":71,"type":"أحوال","case_no":"232","year":"2026","court":"نيابة مركز المنيا ش أ","incoming_no":"3880","incoming_date":"2026-06-09","receive_date":"2026-06-21","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":72,"type":"أحوال","case_no":"16","year":"2025","court":"نيابة مركز المنيا ش أ","incoming_no":"4046","incoming_date":"2026-06-20","receive_date":"2026-06-30","returned":"لا","status":"لم يبدأ","notes":""},
+  {"id":73,"type":"جنح","case_no":"11121","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"4157","incoming_date":"2025-06-12","receive_date":"2025-06-28","returned":"لا","status":"جاري","notes":""},
+  {"id":74,"type":"جنح","case_no":"25036","year":"2025","court":"جنح س أبو قرقاص","incoming_no":"8200","incoming_date":"2025-11-02","receive_date":"2025-11-10","returned":"لا","status":"لم يبدأ","notes":""}
+];
+
+function loadCases() {
+  const saved = localStorage.getItem('expert_cases');
+  if (saved) {
+    try { 
+      const data = JSON.parse(saved);
+      // Ensure all cases have the new fields and normalize status
+      data.forEach(c => {
+        if (c.achievement_type === undefined) c.achievement_type = '';
+        if (c.achievement_month === undefined) c.achievement_month = '';
+        if (c.achievement_notes === undefined) c.achievement_notes = '';
+        if (c.withdraw_date === undefined) c.withdraw_date = '';
+        if (c.withdraw_expert === undefined) c.withdraw_expert = '';
+        if (c.withdraw_notes === undefined) c.withdraw_notes = '';
+        // If case has achievement but status is not "منجزة", fix it
+        if (c.achievement_type && c.achievement_month && c.status !== 'منجزة' && c.status !== 'مسحوبة') {
+          c.status = 'منجزة';
+        }
+      });
+      return data;
+    } catch(e) { return [...defaultCases]; }
+  }
+  // Add new fields to default cases
+  defaultCases.forEach(c => {
+    c.achievement_type = '';
+    c.achievement_month = '';
+    c.achievement_notes = '';
+    c.withdraw_date = '';
+    c.withdraw_expert = '';
+    c.withdraw_notes = '';
+  });
+  return [...defaultCases];
+}
+
+function saveCases() {
+  localStorage.setItem('expert_cases', JSON.stringify(cases));
+}
+
+const cases = loadCases();
+
+let filtered = [...cases];
+
+function init() {
+  populateTypeFilter();
+  renderStats();
+  renderTable();
+  document.querySelectorAll('.search-field input').forEach(inp => {
+    inp.addEventListener('keypress', e => { if(e.key==='Enter') applyFilters(); });
+  });
+}
+
+function populateTypeFilter() {
+  const types = [...new Set(cases.map(c => normalizeType(c.type)))];
+  const sel = document.getElementById('f-type');
+  // Clear existing options except "الكل"
+  while (sel.options.length > 1) {
+    sel.remove(1);
+  }
+  types.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    sel.appendChild(opt);
+  });
+}
+
+function renderStats() {
+  const total = cases.length;
+  const jari = cases.filter(c => c.status === 'جاري').length;
+  const lam = cases.filter(c => c.status === 'لم يبدأ').length;
+  const completed = cases.filter(c => c.status === 'منجزة').length;
+  const returned = cases.filter(c => c.returned === 'نعم').length;
+  const withdrawn = cases.filter(c => c.status === 'مسحوبة').length;
+  const types = [...new Set(cases.map(c => normalizeType(c.type)))].length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat-card" onclick="openStatsModal('type-summary')"><div class="stat-value">${total}</div><div class="stat-label">اجمالي القضايا</div></div>
+    <div class="stat-card active" onclick="openStatsModal('type-detail')"><div class="stat-value">${jari}</div><div class="stat-label">جاري الفحص</div></div>
+    <div class="stat-card pending" onclick="openStatsModal('period-summary')"><div class="stat-value">${lam}</div><div class="stat-label">لم يبدأ</div></div>
+    <div class="stat-card" style="border-top-color:#27ae60;" onclick="openStatsModal('achievement')"><div class="stat-value" style="color:#27ae60;">${completed}</div><div class="stat-label">منجزة</div></div>
+    <div class="stat-card" style="border-top-color:#8e44ad;" onclick="openStatsModal('period-detail')"><div class="stat-value" style="color:#8e44ad;">${withdrawn}</div><div class="stat-label">مسحوبة</div></div>
+  `;
+}
+
+function applyFilters() {
+  const f = {
+    type: document.getElementById('f-type').value,
+    case: document.getElementById('f-case').value.trim(),
+    year: document.getElementById('f-year').value.trim(),
+    court: document.getElementById('f-court').value.trim(),
+    incoming: document.getElementById('f-incoming').value.trim(),
+    incomingDate: document.getElementById('f-incoming-date').value.trim(),
+    receiveDate: document.getElementById('f-receive-date').value.trim(),
+    returned: document.getElementById('f-returned').value,
+    status: document.getElementById('f-status').value,
+    notes: document.getElementById('f-notes').value.trim()
+  };
+  filtered = cases.filter(c => {
+    if (f.type && normalizeType(c.type) !== f.type) return false;
+    if (f.case && !c.case_no.includes(f.case)) return false;
+    if (f.year && !c.year.includes(f.year)) return false;
+    if (f.court && !c.court.includes(f.court)) return false;
+    if (f.incoming && !c.incoming_no.includes(f.incoming)) return false;
+    if (f.incomingDate && !c.incoming_date.includes(f.incomingDate)) return false;
+    if (f.receiveDate && !c.receive_date.includes(f.receiveDate)) return false;
+    if (f.returned && c.returned !== f.returned) return false;
+    if (f.status && c.status !== f.status) return false;
+    if (f.notes && !c.notes.includes(f.notes)) return false;
+    return true;
+  });
+  renderTable();
+}
+
+function clearFilters() {
+  document.getElementById('f-type').value = '';
+  document.getElementById('f-case').value = '';
+  document.getElementById('f-year').value = '';
+  document.getElementById('f-court').value = '';
+  document.getElementById('f-incoming').value = '';
+  document.getElementById('f-incoming-date').value = '';
+  document.getElementById('f-receive-date').value = '';
+  document.getElementById('f-returned').value = '';
+  document.getElementById('f-status').value = '';
+  document.getElementById('f-notes').value = '';
+  filtered = [...cases];
+  renderTable();
+}
+
+function normalizeType(type) {
+  return type === 'مدنية' ? 'مدني' : type;
+}
+
+function renderTable() {
+  const tbody = document.getElementById('tbody');
+  const empty = document.getElementById('empty-state');
+  const count = document.getElementById('result-count');
+  count.textContent = `عدد النتائج: ${filtered.length} قضية`;
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  tbody.innerHTML = filtered.map(c => `
+    <tr>
+      <td>${c.id}</td>
+      <td><span class="badge badge-type">${normalizeType(c.type)}</span></td>
+      <td style="font-weight:600">${c.case_no}</td>
+      <td>${c.year}</td>
+      <td>${c.court}</td>
+      <td>${c.incoming_no}</td>
+      <td dir="ltr" style="text-align:right">${c.incoming_date}</td>
+      <td dir="ltr" style="text-align:right">${c.receive_date}</td>
+      <td><span class="badge ${c.returned==='نعم'?'badge-returned-yes':'badge-returned-no'}">${c.returned}</span></td>
+      <td><span class="badge ${c.status==='جاري'?'badge-status-jari':c.status==='منجزة'?'badge-status-jari':c.status==='مسحوبة'?'badge-returned-yes':'badge-status-lam'}">${c.status}</span></td>
+      <td><span class="badge ${c.achievement_type ? 'badge-status-jari' : 'badge-returned-no'}">${c.achievement_type || '—'}</span></td>
+      <td dir="ltr" style="text-align:right">${c.achievement_month || '—'}</td>
+      <td class="notes-cell" title="${c.notes}">${c.notes || '—'}</td>
+      <td>
+        <div style="position:relative; display:inline-block;">
+          <button class="btn btn-danger" onclick="toggleActionMenu(${c.id}, event)" style="padding:4px 8px; font-size:11px;">
+            إجراءات ▼
+          </button>
+          <div id="action-menu-${c.id}" class="action-menu" style="display:none; position:absolute; top:100%; left:0; background:#fff; border:1px solid #e1e8ed; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:50; min-width:140px; overflow:hidden;">
+            <button onclick="openAchievementModal(${c.id})" style="display:block; width:100%; padding:8px 12px; border:none; background:none; text-align:right; font-size:12px; cursor:pointer; color:#27ae60; font-family:inherit; border-bottom:1px solid #f0f2f5;">
+              ✅ إنجاز
+            </button>
+            <button onclick="openWithdrawModal(${c.id})" style="display:block; width:100%; padding:8px 12px; border:none; background:none; text-align:right; font-size:12px; cursor:pointer; color:#2980b9; font-family:inherit; border-bottom:1px solid #f0f2f5;">
+              📤 سحب
+            </button>
+            <button onclick="deleteCase(${c.id})" style="display:block; width:100%; padding:8px 12px; border:none; background:none; text-align:right; font-size:12px; cursor:pointer; color:#e74c3c; font-family:inherit;">
+              🗑️ حذف
+            </button>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function openAddModal() {
+  const overlay = document.getElementById('add-modal');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('show'), 10);
+}
+function closeAddModal() {
+  const overlay = document.getElementById('add-modal');
+  overlay.classList.remove('show');
+  setTimeout(() => { overlay.style.display = 'none'; clearForm(); }, 250);
+}
+function clearForm() {
+  document.getElementById('new-type').value = '';
+  document.getElementById('new-case').value = '';
+  document.getElementById('new-year').value = '';
+  document.getElementById('new-court').value = '';
+  document.getElementById('new-incoming').value = '';
+  document.getElementById('new-incoming-date').value = '';
+  document.getElementById('new-receive-date').value = '';
+  document.getElementById('new-returned').value = 'لا';
+  document.getElementById('new-status').value = 'لم يبدأ';
+  document.getElementById('new-achievement-type').value = '';
+  document.getElementById('new-achievement-month').value = '';
+  document.getElementById('new-notes').value = '';
+  document.querySelectorAll('.form-field input, .form-field select').forEach(el => el.classList.remove('error'));
+  document.querySelectorAll('.error-msg').forEach(el => el.textContent = '');
+}
+function validateForm() {
+  let valid = true;
+  const fields = ['type','case','year','court','incoming','incoming-date','receive-date'];
+  fields.forEach(f => {
+    const el = document.getElementById('new-' + f);
+    const err = document.getElementById('err-' + f);
+    if (!el.value.trim()) {
+      el.classList.add('error');
+      err.textContent = 'هذا الحقل مطلوب';
+      valid = false;
+    } else {
+      el.classList.remove('error');
+      err.textContent = '';
+    }
+  });
+  return valid;
+}
+function submitCase() {
+  if (!validateForm()) return;
+  const newId = Math.max(...cases.map(c => c.id)) + 1;
+  const newCase = {
+    id: newId,
+    type: normalizeType(document.getElementById('new-type').value),
+    case_no: document.getElementById('new-case').value.trim(),
+    year: document.getElementById('new-year').value.trim(),
+    court: document.getElementById('new-court').value.trim(),
+    incoming_no: document.getElementById('new-incoming').value.trim(),
+    incoming_date: document.getElementById('new-incoming-date').value,
+    receive_date: document.getElementById('new-receive-date').value,
+    returned: document.getElementById('new-returned').value,
+    status: document.getElementById('new-status').value,
+    achievement_type: document.getElementById('new-achievement-type').value,
+    achievement_month: document.getElementById('new-achievement-month').value,
+    notes: document.getElementById('new-notes').value.trim()
+  };
+  cases.push(newCase);
+  saveCases();
+  filtered = [...cases];
+  renderStats();
+  renderTable();
+  closeAddModal();
+  showToast('تمت اضافة القضية بنجاح');
+}
+let currentActionId = null;
+
+function toggleActionMenu(id, event) {
+  event.stopPropagation();
+  // Close all other menus
+  document.querySelectorAll('.action-menu').forEach(menu => {
+    if (menu.id !== 'action-menu-' + id) menu.style.display = 'none';
+  });
+  const menu = document.getElementById('action-menu-' + id);
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+// Close menus when clicking outside
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.action-menu') && !e.target.closest('[onclick^="toggleActionMenu"]')) {
+    document.querySelectorAll('.action-menu').forEach(menu => menu.style.display = 'none');
+  }
+});
+
+// Achievement Modal
+function openAchievementModal(id) {
+  currentActionId = id;
+  const c = cases.find(c => c.id === id);
+  if (!c) return;
+
+  // Pre-fill if data exists
+  document.getElementById('ach-modal-type').value = c.achievement_type || 'تقرير';
+  document.getElementById('ach-modal-month').value = c.achievement_month || '';
+  document.getElementById('ach-modal-notes').value = c.achievement_notes || '';
+
+  const overlay = document.getElementById('achievement-modal');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('show'), 10);
+  document.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none');
+}
+
+function closeAchievementModal() {
+  const overlay = document.getElementById('achievement-modal');
+  overlay.classList.remove('show');
+  setTimeout(() => { overlay.style.display = 'none'; currentActionId = null; }, 250);
+  document.getElementById('err-ach-month').textContent = '';
+}
+
+function submitAchievement() {
+  if (!currentActionId) return;
+
+  const month = document.getElementById('ach-modal-month').value;
+  if (!month) {
+    document.getElementById('err-ach-month').textContent = 'هذا الحقل مطلوب';
+    return;
+  }
+
+  const c = cases.find(c => c.id === currentActionId);
+  if (c) {
+    c.achievement_type = document.getElementById('ach-modal-type').value;
+    c.achievement_month = month;
+    c.achievement_notes = document.getElementById('ach-modal-notes').value.trim();
+    c.status = 'منجزة';
+    saveCases();
+    filtered = [...cases];
+    renderStats();
+    renderTable();
+    showToast('تم تسجيل الإنجاز بنجاح - الموقف: منجزة');
+  }
+  closeAchievementModal();
+}
+
+// Withdraw Modal
+function openWithdrawModal(id) {
+  currentActionId = id;
+  const c = cases.find(c => c.id === id);
+  if (!c) return;
+
+  // Pre-fill if data exists
+  document.getElementById('withdraw-modal-date').value = c.withdraw_date || '';
+  document.getElementById('withdraw-modal-expert').value = c.withdraw_expert || '';
+  document.getElementById('withdraw-modal-notes').value = c.withdraw_notes || '';
+
+  const overlay = document.getElementById('withdraw-modal');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('show'), 10);
+  document.querySelectorAll('.action-menu').forEach(m => m.style.display = 'none');
+}
+
+function closeWithdrawModal() {
+  const overlay = document.getElementById('withdraw-modal');
+  overlay.classList.remove('show');
+  setTimeout(() => { overlay.style.display = 'none'; currentActionId = null; }, 250);
+  document.getElementById('err-withdraw-date').textContent = '';
+  document.getElementById('err-withdraw-expert').textContent = '';
+}
+
+function submitWithdraw() {
+  if (!currentActionId) return;
+
+  const date = document.getElementById('withdraw-modal-date').value;
+  const expert = document.getElementById('withdraw-modal-expert').value.trim();
+
+  let valid = true;
+  if (!date) { document.getElementById('err-withdraw-date').textContent = 'هذا الحقل مطلوب'; valid = false; }
+  else { document.getElementById('err-withdraw-date').textContent = ''; }
+
+  if (!expert) { document.getElementById('err-withdraw-expert').textContent = 'هذا الحقل مطلوب'; valid = false; }
+  else { document.getElementById('err-withdraw-expert').textContent = ''; }
+
+  if (!valid) return;
+
+  const c = cases.find(c => c.id === currentActionId);
+  if (c) {
+    c.withdraw_date = date;
+    c.withdraw_expert = expert;
+    c.withdraw_notes = document.getElementById('withdraw-modal-notes').value.trim();
+    c.status = 'مسحوبة';
+    saveCases();
+    filtered = [...cases];
+    renderStats();
+    renderTable();
+    showToast('تم تسجيل السحب بنجاح');
+  }
+  closeWithdrawModal();
+}
+
+function deleteCase(id) {
+  if (!confirm('هل انت متأكد من حذف هذه القضية؟')) return;
+  const idx = cases.findIndex(c => c.id === id);
+  if (idx > -1) {
+    cases.splice(idx, 1);
+    saveCases();
+    filtered = [...cases];
+    renderStats();
+    renderTable();
+    showToast('تم حذف القضية بنجاح');
+  }
+}
+
+// Statistics Modal
+function openStatsModal(tabName) {
+  const overlay = document.getElementById('stats-modal');
+  overlay.style.display = 'flex';
+  setTimeout(() => overlay.classList.add('show'), 10);
+  if (tabName) switchStatsTab(tabName);
+  renderTypeSummary();
+  renderTypeDetail();
+  const today = new Date();
+  const sixMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 6, today.getDate());
+  document.getElementById('period-from').value = sixMonthsAgo.toISOString().split('T')[0];
+  document.getElementById('period-to').value = today.toISOString().split('T')[0];
+  document.getElementById('period-detail-from').value = sixMonthsAgo.toISOString().split('T')[0];
+  document.getElementById('period-detail-to').value = today.toISOString().split('T')[0];
+
+  // Set achievement default month (current month)
+  const currentMonth = today.toISOString().slice(0, 7);
+  document.getElementById('achievement-from').value = currentMonth;
+
+  // Populate achievement type filter
+  const achTypeSel = document.getElementById('achievement-type');
+  while (achTypeSel.options.length > 1) { achTypeSel.remove(1); }
+  const types = [...new Set(cases.map(c => normalizeType(c.type)))];
+  types.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t; opt.textContent = t;
+    achTypeSel.appendChild(opt);
+  });
+
+  applyPeriodFilter();
+  applyPeriodDetailFilter();
+}
+function closeStatsModal() {
+  const overlay = document.getElementById('stats-modal');
+  overlay.classList.remove('show');
+  setTimeout(() => overlay.style.display = 'none', 250);
+}
+function switchStatsTab(tabName) {
+  document.querySelectorAll('.stats-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.stats-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.stats-tab[data-tab="${tabName}"]`).classList.add('active');
+  document.getElementById('tab-' + tabName).classList.add('active');
+}
+
+function renderTypeSummary() {
+  const typeCounts = {};
+  cases.forEach(c => { const nt = normalizeType(c.type); typeCounts[nt] = (typeCounts[nt] || 0) + 1; });
+  const entries = Object.entries(typeCounts).sort((a,b) => b[1] - a[1]);
+  const total = cases.length;
+
+  document.getElementById('type-summary-cards').innerHTML = entries.map(([type, count]) => `
+    <div class="summary-card">
+      <div class="summary-value">${count}</div>
+      <div class="summary-label">${type}</div>
+    </div>
+  `).join('');
+
+  const maxVal = Math.max(...entries.map(e => e[1]));
+  document.getElementById('type-chart').innerHTML = entries.map(([type, count]) => {
+    const pct = (count / maxVal * 100).toFixed(0);
+    return `
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="height: ${pct}%"><span class="chart-bar-value">${count}</span></div>
+        <div class="chart-label">${type}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderTypeDetail() {
+  const typeData = {};
+  cases.forEach(c => {
+    const nt = normalizeType(c.type);
+    if (!typeData[nt]) typeData[nt] = { count: 0, jari: 0, lam: 0, returned: 0 };
+    typeData[nt].count++;
+    if (c.status === 'جاري') typeData[nt].jari++;
+    if (c.status === 'لم يبدأ') typeData[nt].lam++;
+    if (c.returned === 'نعم') typeData[nt].returned++;
+  });
+  const total = cases.length;
+  const entries = Object.entries(typeData).sort((a,b) => b[1].count - a[1].count);
+
+  document.getElementById('type-detail-tbody').innerHTML = entries.map(([type, d]) => `
+    <tr>
+      <td><span class="badge badge-type">${type}</span></td>
+      <td style="font-weight:600">${d.count}</td>
+      <td><span class="badge badge-status-jari">${d.jari}</span></td>
+      <td><span class="badge badge-status-lam">${d.lam}</span></td>
+      <td><span class="badge ${d.returned > 0 ? 'badge-returned-yes' : 'badge-returned-no'}">${d.returned}</span></td>
+      <td>${((d.count / total) * 100).toFixed(1)}%</td>
+    </tr>
+  `).join('');
+}
+
+function applyPeriodFilter() {
+  const from = document.getElementById('period-from').value;
+  const to = document.getElementById('period-to').value;
+  if (!from || !to) return;
+
+  const fromDate = new Date(from);
+  const toDate = new Date(to);
+  toDate.setHours(23,59,59,999);
+
+  const periodCases = cases.filter(c => {
+    const d = new Date(c.incoming_date);
+    return d >= fromDate && d <= toDate;
+  });
+
+  const typeCounts = {};
+  periodCases.forEach(c => { const nt = normalizeType(c.type); typeCounts[nt] = (typeCounts[nt] || 0) + 1; });
+  const entries = Object.entries(typeCounts).sort((a,b) => b[1] - a[1]);
+
+  document.getElementById('period-summary-cards').innerHTML = `
+    <div class="summary-card" style="border-color:#5d7a8c;">
+      <div class="summary-value" style="color:#5d7a8c">${periodCases.length}</div>
+      <div class="summary-label">اجمالي القضايا في الفترة</div>
+    </div>
+    ${entries.map(([type, count]) => `
+      <div class="summary-card">
+        <div class="summary-value">${count}</div>
+        <div class="summary-label">${type}</div>
+      </div>
+    `).join('')}
+  `;
+
+  const maxVal = Math.max(...entries.map(e => e[1]), 1);
+  document.getElementById('period-chart').innerHTML = entries.map(([type, count]) => {
+    const pct = (count / maxVal * 100).toFixed(0);
+    return `
+      <div class="chart-bar-wrap">
+        <div class="chart-bar" style="height: ${pct}%"><span class="chart-bar-value">${count}</span></div>
+        <div class="chart-label">${type}</div>
+      </div>
+    `;
+  }).join('') || '<div class="empty-state" style="padding:20px">لا توجد قضايا في هذه الفترة</div>';
+}
+
+function applyPeriodDetailFilter() {
+  const from = document.getElementById('period-detail-from').value;
+  const to = document.getElementById('period-detail-to').value;
+  if (!from || !to) return;
+
+  const fromDate = new Date(from);
+  const toDate = new Date(to);
+  toDate.setHours(23,59,59,999);
+
+  const periodCases = cases.filter(c => {
+    const d = new Date(c.incoming_date);
+    return d >= fromDate && d <= toDate;
+  }).sort((a,b) => new Date(a.incoming_date) - new Date(b.incoming_date));
+
+  const tbody = document.getElementById('period-detail-tbody');
+  const empty = document.getElementById('period-detail-empty');
+  const table = document.getElementById('period-detail-table');
+
+  if (periodCases.length === 0) {
+    tbody.innerHTML = '';
+    table.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+
+  table.style.display = 'table';
+  empty.style.display = 'none';
+  tbody.innerHTML = periodCases.map(c => `
+    <tr>
+      <td>${c.id}</td>
+      <td><span class="badge badge-type">${normalizeType(c.type)}</span></td>
+      <td style="font-weight:600">${c.case_no}</td>
+      <td>${c.year}</td>
+      <td>${c.court}</td>
+      <td>${c.incoming_no}</td>
+      <td dir="ltr" style="text-align:right">${c.incoming_date}</td>
+      <td><span class="badge ${c.status==='جاري'?'badge-status-jari':c.status==='منجزة'?'badge-status-jari':c.status==='مسحوبة'?'badge-returned-yes':'badge-status-lam'}">${c.status}</span></td>
+      <td><span class="badge ${c.returned==='نعم'?'badge-returned-yes':'badge-returned-no'}">${c.returned}</span></td>
+    </tr>
+  `).join('');
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// Export / Import Data
+function printTable() {
+  const printWindow = window.open('', '_blank');
+  const tableHTML = document.getElementById('cases-table').outerHTML;
+  const count = filtered.length;
+  const now = new Date().toLocaleString('ar-EG');
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <title>طباعة بيانات القضايا - برنامج الخبير</title>
+      <style>
+        @media print {
+          body { margin: 0; padding: 20px; font-family: "Segoe UI", Tahoma, sans-serif; }
+        }
+        body { font-family: "Segoe UI", Tahoma, sans-serif; padding: 20px; color: #2c3e50; }
+        .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #5d7a8c; padding-bottom: 15px; }
+        .print-header h1 { margin: 0; font-size: 22px; color: #34495e; }
+        .print-header .sub { font-size: 13px; color: #7f8c8d; margin-top: 5px; }
+        .print-header .expert { display: inline-block; margin-top: 8px; font-size: 12px; color: #fff; background: #5d7a8c; padding: 4px 16px; border-radius: 12px; }
+        .print-info { display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 12px; color: #7f8c8d; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { background: #f8f9fa; padding: 8px 6px; text-align: right; font-weight: 600; color: #5d7a8c; border-bottom: 2px solid #5d7a8c; border: 1px solid #e1e8ed; }
+        td { padding: 7px 6px; border-bottom: 1px solid #f0f2f5; border: 1px solid #e1e8ed; vertical-align: middle; }
+        tr:nth-child(even) td { background: #fafbfc; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .badge-type { background: #eaf2f8; color: #2980b9; }
+        .badge-status-jari { background: #e8f8f0; color: #27ae60; }
+        .badge-status-lam { background: #fef5e7; color: #d68910; }
+        .badge-returned-yes { background: #fdedec; color: #c0392b; }
+        .badge-returned-no { background: #f4f6f7; color: #7f8c8d; }
+        .notes-cell { max-width: 150px; font-size: 10px; }
+        .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #95a5a6; border-top: 1px solid #e1e8ed; padding-top: 10px; }
+        @media print {
+          .no-print { display: none; }
+        }
+        .no-print { text-align: center; margin-bottom: 20px; }
+        .no-print button { padding: 10px 30px; background: #5d7a8c; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+      </style>
+    </head>
+    <body>
+      <div class="no-print">
+        <button onclick="window.print()">🖨️ اضغط للطباعة</button>
+      </div>
+      <div class="print-header">
+        <h1>برنامج الخبير - نظام إدارة القضايا الخبيرية</h1>
+        <div class="sub">بيان تفصيلي بالقضايا المعروضة</div>
+        <div class="expert">الخبير / حسن محمد رشاد</div>
+      </div>
+      <div class="print-info">
+        <span>تاريخ الطباعة: ${now}</span>
+        <span>إجمالي القضايا المعروضة: ${count} قضية</span>
+      </div>
+      ${tableHTML}
+      <div class="footer">
+        تم إنشاء هذا التقرير بواسطة برنامج الخبير - جميع الحقوق محفوظة
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 600);
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+function printStats() {
+  const printWindow = window.open('', '_blank');
+  const now = new Date().toLocaleString('ar-EG');
+
+  // Get active tab content
+  const activeTab = document.querySelector('.stats-content.active');
+  const activeTabName = document.querySelector('.stats-tab.active').textContent;
+  const tabId = activeTab.id;
+
+  let contentHTML = '';
+
+  if (tabId === 'tab-type-summary') {
+    const cards = document.getElementById('type-summary-cards').innerHTML;
+    const chart = document.getElementById('type-chart').innerHTML;
+    contentHTML = `
+      <h2 style="color:#34495e; margin-bottom:15px; font-size:18px;">بيان عددي بنوع القضايا</h2>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin-bottom:20px;">
+        ${cards}
+      </div>
+      <div style="background:#fafbfc; border-radius:10px; padding:15px; margin-bottom:20px;">
+        ${chart}
+      </div>
+    `;
+  } else if (tabId === 'tab-type-detail') {
+    const table = document.getElementById('type-detail-table').outerHTML;
+    contentHTML = `
+      <h2 style="color:#34495e; margin-bottom:15px; font-size:18px;">بيان تفصيلي بنوع القضايا</h2>
+      ${table}
+    `;
+  } else if (tabId === 'tab-period-summary') {
+    const from = document.getElementById('period-from').value;
+    const to = document.getElementById('period-to').value;
+    const cards = document.getElementById('period-summary-cards').innerHTML;
+    const chart = document.getElementById('period-chart').innerHTML;
+    contentHTML = `
+      <h2 style="color:#34495e; margin-bottom:10px; font-size:18px;">بيان عددي بالفترة</h2>
+      <p style="color:#7f8c8d; font-size:13px; margin-bottom:15px;">الفترة من ${from} إلى ${to}</p>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px; margin-bottom:20px;">
+        ${cards}
+      </div>
+      <div style="background:#fafbfc; border-radius:10px; padding:15px; margin-bottom:20px;">
+        ${chart}
+      </div>
+    `;
+  } else if (tabId === 'tab-period-detail') {
+    const from = document.getElementById('period-detail-from').value;
+    const to = document.getElementById('period-detail-to').value;
+    const table = document.getElementById('period-detail-table').outerHTML;
+    const tbody = document.getElementById('period-detail-tbody');
+    const count = tbody ? tbody.children.length : 0;
+    contentHTML = `
+      <h2 style="color:#34495e; margin-bottom:10px; font-size:18px;">بيان تفصيلي بالفترة</h2>
+      <p style="color:#7f8c8d; font-size:13px; margin-bottom:15px;">الفترة من ${from} إلى ${to} - عدد القضايا: ${count}</p>
+      ${table}
+    `;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <title>طباعة التقرير - برنامج الخبير</title>
+      <style>
+        @media print {
+          body { margin: 0; padding: 20px; font-family: "Segoe UI", Tahoma, sans-serif; }
+        }
+        body { font-family: "Segoe UI", Tahoma, sans-serif; padding: 20px; color: #2c3e50; }
+        .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #5d7a8c; padding-bottom: 15px; }
+        .print-header h1 { margin: 0; font-size: 22px; color: #34495e; }
+        .print-header .sub { font-size: 13px; color: #7f8c8d; margin-top: 5px; }
+        .print-header .expert { display: inline-block; margin-top: 8px; font-size: 12px; color: #fff; background: #5d7a8c; padding: 4px 16px; border-radius: 12px; }
+        .print-info { margin-bottom: 15px; font-size: 12px; color: #7f8c8d; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        th { background: #f8f9fa; padding: 8px 6px; text-align: right; font-weight: 600; color: #5d7a8c; border: 1px solid #e1e8ed; }
+        td { padding: 7px 6px; border: 1px solid #e1e8ed; vertical-align: middle; }
+        tr:nth-child(even) td { background: #fafbfc; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+        .badge-type { background: #eaf2f8; color: #2980b9; }
+        .badge-status-jari { background: #e8f8f0; color: #27ae60; }
+        .badge-status-lam { background: #fef5e7; color: #d68910; }
+        .badge-returned-yes { background: #fdedec; color: #c0392b; }
+        .badge-returned-no { background: #f4f6f7; color: #7f8c8d; }
+        .summary-card { background: #fff; border: 1px solid #e1e8ed; border-radius: 8px; padding: 12px; text-align: center; }
+        .summary-value { font-size: 20px; font-weight: 600; color: #2c3e50; }
+        .summary-label { font-size: 11px; color: #7f8c8d; margin-top: 3px; }
+        .chart-container { display: flex; align-items: flex-end; gap: 10px; height: 180px; padding: 15px 8px 8px; }
+        .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+        .chart-bar { width: 100%; max-width: 50px; background: linear-gradient(to top, #5d7a8c, #7fa3b8); border-radius: 6px 6px 0 0; position: relative; }
+        .chart-bar-value { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 12px; font-weight: 600; color: #2c3e50; }
+        .chart-label { font-size: 11px; color: #5d7a8c; font-weight: 500; text-align: center; }
+        .footer { margin-top: 20px; text-align: center; font-size: 11px; color: #95a5a6; border-top: 1px solid #e1e8ed; padding-top: 10px; }
+        @media print {
+          .no-print { display: none; }
+        }
+        .no-print { text-align: center; margin-bottom: 20px; }
+        .no-print button { padding: 10px 30px; background: #5d7a8c; color: #fff; border: none; border-radius: 8px; font-size: 14px; cursor: pointer; }
+      </style>
+    </head>
+    <body>
+      <div class="no-print">
+        <button onclick="window.print()">🖨️ اضغط للطباعة</button>
+      </div>
+      <div class="print-header">
+        <h1>برنامج الخبير - نظام إدارة القضايا الخبيرية</h1>
+        <div class="sub">${activeTabName}</div>
+        <div class="expert">الخبير / حسن محمد رشاد</div>
+      </div>
+      <div class="print-info">
+        <span>تاريخ الطباعة: ${now}</span>
+      </div>
+      ${contentHTML}
+      <div class="footer">
+        تم إنشاء هذا التقرير بواسطة برنامج الخبير - جميع الحقوق محفوظة
+      </div>
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 600);
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+function applyAchievementFilter() {
+  const month = document.getElementById('achievement-from').value;
+  const typeFilter = document.getElementById('achievement-type').value;
+
+  if (!month) {
+    showToast('الرجاء اختيار شهر الإنجاز');
+    return;
+  }
+
+  // Filter only completed cases with achievement_month matching the selected month
+  let filteredCases = cases.filter(c => {
+    return c.status === 'منجزة' && c.achievement_month === month;
+  });
+
+  if (typeFilter) {
+    filteredCases = filteredCases.filter(c => normalizeType(c.type) === typeFilter);
+  }
+
+  filteredCases.sort((a,b) => new Date(a.incoming_date) - new Date(b.incoming_date));
+
+  renderAchievementSheet(filteredCases, month);
+}
+
+function renderAchievementSheet(casesList, from, to) {
+  const container = document.getElementById('achievement-preview');
+  const count = casesList.length;
+  const now = new Date().toLocaleDateString('ar-EG');
+
+  // Calculate type counts for the summary box
+  const typeCounts = {};
+  casesList.forEach(c => {
+    const nt = normalizeType(c.type);
+    typeCounts[nt] = (typeCounts[nt] || 0) + 1;
+  });
+
+  let summaryRows = '';
+  const typeOrder = ['استئناف عالي', 'مدني', 'جنح', 'قضاء إداري', 'أحوال'];
+  typeOrder.forEach(t => {
+    if (typeCounts[t]) {
+      summaryRows += `<tr><td style="border:1px solid #000; padding:4px 8px; text-align:center; font-size:11px;">${t}</td><td style="border:1px solid #000; padding:4px 8px; text-align:center; font-size:11px; font-weight:bold;">${typeCounts[t]}</td></tr>`;
+    }
+  });
+
+  let tableRows = '';
+  casesList.forEach((c, idx) => {
+    const caseInfo = `${c.case_no} / ${c.year} - ${c.court}`;
+    const achType = c.achievement_type || '—';
+    const achMonth = c.achievement_month || '—';
+    tableRows += `
+      <tr>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${idx + 1}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${c.incoming_no}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px; direction:ltr;">${c.incoming_date}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${caseInfo}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${c.notes || '—'}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${normalizeType(c.type)}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${achType}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${c.returned === 'نعم' ? 'نعم' : '—'}</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">${c.notes || '—'}</td>
+      </tr>
+    `;
+  });
+
+  // Add empty rows to fill the table (minimum 14 rows like the form)
+  const emptyRowsNeeded = Math.max(0, 14 - casesList.length);
+  for (let i = 0; i < emptyRowsNeeded; i++) {
+    tableRows += `
+      <tr>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+        <td style="border:1px solid #000; padding:5px; text-align:center; font-size:10px;">&nbsp;</td>
+      </tr>
+    `;
+  }
+
+  container.innerHTML = `
+    <div style="background:#fff; border:2px solid #000; padding:15px; font-family:'Arial', 'Tahoma', sans-serif; max-width:900px; margin:0 auto;" id="achievement-sheet">
+      <!-- Header -->
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px; border-bottom:2px solid #000; padding-bottom:10px;">
+        <div style="text-align:center; flex:1;">
+          <div style="font-size:14px; font-weight:bold; margin-bottom:3px;">وزارة العدل</div>
+          <div style="font-size:13px; font-weight:bold; margin-bottom:3px;">قطاع مصلحة الخبراء</div>
+          <div style="font-size:12px; font-weight:bold;">الإدارة المركزية لخبراء المنيا</div>
+        </div>
+        <div style="text-align:center; flex:2;">
+          <div style="font-size:16px; font-weight:bold; margin-bottom:5px;">كشف إنجاز عن شهر: ${new Date(from).getMonth() + 1} سنة ${new Date(from).getFullYear()}</div>
+          <div style="font-size:12px; margin-bottom:2px;">اسم الخبير: <strong>حسن محمد رشاد</strong></div>
+          <div style="font-size:12px; margin-bottom:2px;">التخصص: <strong>هندسي</strong></div>
+          <div style="font-size:12px;">المؤهل: <strong>خبير</strong></div>
+        </div>
+        <div style="text-align:center; flex:1;">
+          <div style="font-size:12px; margin-bottom:5px;">( ${count > 0 ? 'يعمل فترة مسائية' : 'لا يعمل'} )</div>
+          <div style="font-size:11px;">المحل المطلوب: عدد ${count} - فقط خمسة لا غير.</div>
+        </div>
+      </div>
+
+      <!-- Summary Box -->
+      <div style="display:flex; justify-content:flex-end; margin-bottom:10px;">
+        <table style="border-collapse:collapse; width:200px; border:2px solid #000;">
+          <thead>
+            <tr style="background:#f0f0f0;">
+              <th style="border:1px solid #000; padding:4px; font-size:11px;">النوع</th>
+              <th style="border:1px solid #000; padding:4px; font-size:11px;">العدد</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${summaryRows}
+            <tr style="background:#f0f0f0; font-weight:bold;">
+              <td style="border:1px solid #000; padding:4px; text-align:center; font-size:11px;">الإجمالي</td>
+              <td style="border:1px solid #000; padding:4px; text-align:center; font-size:11px;">${count}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Main Table -->
+      <table style="width:100%; border-collapse:collapse; border:2px solid #000; margin-bottom:15px;">
+        <thead>
+          <tr style="background:#f0f0f0;">
+            <th rowspan="2" style="border:1px solid #000; padding:5px; font-size:10px; width:3%;">م</th>
+            <th colspan="2" style="border:1px solid #000; padding:5px; font-size:10px;">الوارد</th>
+            <th rowspan="2" style="border:1px solid #000; padding:5px; font-size:10px; width:20%;">بيانات القضية</th>
+            <th rowspan="2" style="border:1px solid #000; padding:5px; font-size:10px; width:12%;">أسماء الخصوم</th>
+            <th rowspan="2" style="border:1px solid #000; padding:5px; font-size:10px; width:8%;">نوع القضية</th>
+            <th rowspan="2" style="border:1px solid #000; padding:5px; font-size:10px; width:8%;">نوع الإنجاز</th>
+            <th rowspan="2" style="border:1px solid #000; padding:5px; font-size:10px; width:10%;">بيانات القضايا المشتركة</th>
+            <th rowspan="2" style="border:1px solid #000; padding:5px; font-size:10px; width:12%;">ملاحظات</th>
+          </tr>
+          <tr style="background:#f0f0f0;">
+            <th style="border:1px solid #000; padding:5px; font-size:10px; width:10%;">رقم</th>
+            <th style="border:1px solid #000; padding:5px; font-size:10px; width:10%;">تاريخ</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableRows}
+        </tbody>
+      </table>
+
+      <!-- Footer -->
+      <div style="border:2px solid #000; padding:10px; margin-top:10px;">
+        <div style="font-size:12px; font-weight:bold; margin-bottom:8px; text-align:right;">تحريراً في: ${now}</div>
+        <table style="width:100%; border-collapse:collapse;">
+          <tr>
+            <td style="border:1px solid #000; padding:8px; text-align:center; font-size:11px; width:16%;"><strong>الميــان</strong></td>
+            <td style="border:1px solid #000; padding:8px; text-align:center; font-size:11px; width:16%;"><strong>السكرتارية</strong></td>
+            <td style="border:1px solid #000; padding:8px; text-align:center; font-size:11px; width:16%;"><strong>الخبيــر</strong></td>
+            <td style="border:1px solid #000; padding:8px; text-align:center; font-size:11px; width:16%;"><strong>رئيس القسم</strong></td>
+            <td style="border:1px solid #000; padding:8px; text-align:center; font-size:11px; width:16%;"><strong>وكيل القسم</strong></td>
+            <td style="border:1px solid #000; padding:8px; text-align:center; font-size:11px; width:16%;"><strong>رئيس المكتب</strong></td>
+          </tr>
+          <tr>
+            <td style="border:1px solid #000; padding:15px; text-align:center; font-size:10px;">&nbsp;<br>&nbsp;</td>
+            <td style="border:1px solid #000; padding:15px; text-align:center; font-size:10px;">&nbsp;<br>&nbsp;</td>
+            <td style="border:1px solid #000; padding:15px; text-align:center; font-size:10px;">حسن محمد رشاد<br><span style="font-size:9px;">الإسم</span></td>
+            <td style="border:1px solid #000; padding:15px; text-align:center; font-size:10px;">&nbsp;<br>&nbsp;</td>
+            <td style="border:1px solid #000; padding:15px; text-align:center; font-size:10px;">&nbsp;<br>&nbsp;</td>
+            <td style="border:1px solid #000; padding:15px; text-align:center; font-size:10px;">&nbsp;<br>&nbsp;</td>
+          </tr>
+        </table>
+        <div style="text-align:left; font-size:10px; margin-top:5px; color:#666;">صـ ١</div>
+      </div>
+
+      <div style="text-align:center; margin-top:15px;">
+        <button class="btn btn-primary" onclick="printAchievementSheet()" style="padding:10px 30px; font-size:14px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          طباعة كشف الإنجاز
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function printAchievementSheet() {
+  const sheet = document.getElementById('achievement-sheet');
+  if (!sheet) {
+    showToast('الرجاء عرض كشف الإنجاز أولاً');
+    return;
+  }
+
+  const printWindow = window.open('', '_blank');
+  const now = new Date().toLocaleDateString('ar-EG');
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="UTF-8">
+      <title>كشف إنجاز - حسن محمد رشاد</title>
+      <style>
+        @page { size: A4 landscape; margin: 10mm; }
+        @media print {
+          body { margin: 0; padding: 0; }
+          .no-print { display: none !important; }
+        }
+        body { font-family: "Arial", "Tahoma", sans-serif; padding: 10px; color: #000; background: #fff; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 4px; text-align: center; font-size: 10px; }
+        th { background: #f0f0f0; font-weight: bold; }
+        .header-text { text-align: center; font-size: 12px; }
+        .header-text h3 { margin: 2px 0; font-size: 14px; }
+        .header-text h4 { margin: 2px 0; font-size: 13px; }
+        .header-text h5 { margin: 2px 0; font-size: 12px; }
+        .summary-box { border: 2px solid #000; width: 200px; }
+        .summary-box th, .summary-box td { border: 1px solid #000; padding: 3px; font-size: 10px; }
+        .footer-box { border: 2px solid #000; margin-top: 10px; padding: 8px; }
+        .footer-box td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 10px; height: 40px; }
+        .sheet-container { border: 2px solid #000; padding: 12px; }
+      </style>
+    </head>
+    <body>
+      <div class="no-print" style="text-align:center; margin-bottom:15px;">
+        <button onclick="window.print()" style="padding:10px 30px; background:#5d7a8c; color:#fff; border:none; border-radius:8px; font-size:14px; cursor:pointer;">🖨️ اضغط للطباعة</button>
+      </div>
+      ${sheet.innerHTML.replace('<button class="btn btn-primary" onclick="printAchievementSheet()"', '<button style="display:none;"')}
+      <script>
+        window.onload = function() {
+          setTimeout(function() {
+            window.print();
+          }, 600);
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+
+function exportData() {
+  const data = {
+    version: 1,
+    exportDate: new Date().toISOString(),
+    cases: cases
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'expert_cases_backup_' + new Date().toISOString().split('T')[0] + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('تم تصدير البيانات بنجاح');
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.cases || !Array.isArray(data.cases)) {
+        throw new Error('ملف غير صالح');
+      }
+
+      if (!confirm('هل أنت متأكد من استيراد البيانات؟ سيتم استبدال جميع البيانات الحالية.')) {
+        input.value = '';
+        return;
+      }
+
+      // Clear current cases and load new ones
+      cases.length = 0;
+      data.cases.forEach(c => cases.push(c));
+      saveCases();
+      filtered = [...cases];
+      renderStats();
+      renderTable();
+      populateTypeFilter();
+      showToast('تم استيراد البيانات بنجاح - ' + cases.length + ' قضية');
+    } catch (err) {
+      showToast('خطأ في استيراد الملف: ' + err.message);
+      document.getElementById('toast').classList.add('error');
+      setTimeout(() => document.getElementById('toast').classList.remove('error'), 3000);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// Close modals on overlay click
+document.getElementById('add-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAddModal();
+});
+document.getElementById('stats-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeStatsModal();
+});
+document.getElementById('achievement-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeAchievementModal();
+});
+document.getElementById('withdraw-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeWithdrawModal();
+});
+
+init();
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('service-worker.js')
+    .then(reg => console.log('Service Worker registered:', reg.scope))
+    .catch(err => console.log('Service Worker registration failed:', err));
+}
+</script>
+</body>
+</html>
